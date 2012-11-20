@@ -4,12 +4,13 @@ import os, random
 import pygame
 from pygame.locals import *
 
-SCREENWIDTH    = 1280
-SCREENHEIGHT   = 720
+SCREENWIDTH    = 680
+SCREENHEIGHT   = 480
 ALIEN_RELOAD   = 12     #frames between new aliens
 ALIEN_ODDS     = 20     #chances a new alien appears
 SCREENRECT     = Rect(0, 0, SCREENWIDTH, SCREENHEIGHT)
 SCORE          = 0
+DEADALIENS     = 0
 
 #our directory 
 main_dir = os.path.split(os.path.abspath(__file__))[0]
@@ -80,11 +81,19 @@ class Alien(pygame.sprite.Sprite):
 
 
     def update(self):
+        global DEADALIENS
         self.rect.move_ip(self.facing, 0)
         # wether the alien is in the screen
         if not SCREENRECT.contains(self.rect):
             self.facing = -self.facing; #go the opposite way
             self.rect.top = self.rect.bottom + 1 #move it to the next level
+        #here, we should kill the alien
+        if self.rect.top > SCREENHEIGHT:
+            print (self.rect.top)
+            self.kill()
+            DEADALIENS = DEADALIENS + 1
+        if DEADALIENS > 20:
+            Text('red', 'You Lose', 300, 200)            
 
 
 class Explosion(pygame.sprite.Sprite):
@@ -119,6 +128,17 @@ class Score(pygame.sprite.Sprite):
             msg = "Score: %d" % SCORE
             self.image = self.font.render(msg, 0, self.color)
 
+class Text(pygame.sprite.Sprite):
+    def __init__(self, color, string, x, y):
+        pygame.sprite.Sprite.__init__(self, self.containers)
+        self.font = pygame.font.Font(None, 40)
+        self.string = string
+        self.color = Color(color)
+        self.update()
+        self.rect = self.image.get_rect().move(x, y)
+
+    def update(self):
+        self.image = self.font.render(self.string, 0, self.color)
 
 def main():
     # Initialize
@@ -168,12 +188,14 @@ def main():
     Explosion.containers = all
     #Score.containers = all
     Fist.containers = all
+    Text.containers = all
 
     # Initialize
     alienreload = ALIEN_RELOAD
     clock = pygame.time.Clock()
 
     global SCORE
+    global DEADALIENS
     fist = Fist()
     if pygame.font:
         all.add(Score())
@@ -181,6 +203,8 @@ def main():
     while True:
         all.clear(screen, background)
 
+        if DEADALIENS > 20:
+            return
         # handle input 
         for event in pygame.event.get():
             if event.type == QUIT:
