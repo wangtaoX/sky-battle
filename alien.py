@@ -32,7 +32,6 @@ def load_image(file, colorkey = None):
         image.set_colorkey(colorkey, RLEACCEL)
     return image
 
-
 def load_images(*files):
     imgs = []
     for file in files:
@@ -75,13 +74,14 @@ class Alien(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self, self.containers)
         self.image = self.images[random.choice((0, 1, 2))]
         self.rect = self.image.get_rect()
+        #alien`s speed
         self.facing = random.choice((-1,1)) * Alien.speed
         if self.facing < 0:
             self.rect.right = SCREENRECT.right
 
-
     def update(self):
         global DEADALIENS
+        #move alines
         self.rect.move_ip(self.facing, 0)
         # wether the alien is in the screen
         if not SCREENRECT.contains(self.rect):
@@ -92,11 +92,12 @@ class Alien(pygame.sprite.Sprite):
             print (self.rect.top)
             self.kill()
             DEADALIENS = DEADALIENS + 1
-        if DEADALIENS > 20:
+        if DEADALIENS > 10:
             Text('red', 'You Lose', 300, 200)            
 
 
 class Explosion(pygame.sprite.Sprite):
+    """Explosion"""
     defaultlife = 12 # boom effect
     images = []
     def __init__(self, actor):
@@ -105,11 +106,11 @@ class Explosion(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(center=actor.rect.center)
         self.life = self.defaultlife
 
-
     def update(self):
         self.life = self.life - 1
         self.image = self.images[self.life%2]
         if self.life <= 0: self.kill()
+
 
 class Score(pygame.sprite.Sprite):
     def __init__(self):
@@ -121,17 +122,17 @@ class Score(pygame.sprite.Sprite):
         self.update()
         self.rect = self.image.get_rect().move(10, 450)
 
-
     def update(self):
         if SCORE != self.lastscore:
             self.lastscore = SCORE
             msg = "Score: %d" % SCORE
             self.image = self.font.render(msg, 0, self.color)
 
+
 class Text(pygame.sprite.Sprite):
     def __init__(self, color, string, x, y):
         pygame.sprite.Sprite.__init__(self, self.containers)
-        self.font = pygame.font.Font(None, 40)
+        self.font = pygame.font.Font(None, 50)
         self.string = string
         self.color = Color(color)
         self.update()
@@ -139,6 +140,7 @@ class Text(pygame.sprite.Sprite):
 
     def update(self):
         self.image = self.font.render(self.string, 0, self.color)
+
 
 def main():
     # Initialize
@@ -203,7 +205,7 @@ def main():
     while True:
         all.clear(screen, background)
 
-        if DEADALIENS > 20:
+        if DEADALIENS > 10:
             return
         # handle input 
         for event in pygame.event.get():
